@@ -3,14 +3,15 @@ const EC = require('elliptic').ec;
 const ec = new EC('secp256k1');
 
 class Transaction{
-    constructor(fromAddress,toAddress, ammount){
+    constructor(fromAddress,toAddress, amount){
         this.fromAddress = fromAddress;
         this.toAddress = toAddress;
-        this.ammount = ammount;
+        this.amount = amount;
+        this.timestamp = Date.now();
     }
 
     calculateHash(){
-        return SHA256(this.fromAddress + this.toAddress + this.ammount).toString();
+        return SHA256(this.fromAddress + this.toAddress + this.amount + this.timestamp).toString();
     
     }
     signTransaction(signingKey){
@@ -31,7 +32,6 @@ class Transaction{
 
         const publicKey = ec.keyFromPublic(this.fromAddress, 'hex');
         return publicKey.verify(this.calculateHash(),this.signature);
-
     }
 }
 
@@ -66,17 +66,15 @@ class Block{
     
 }
 
-
-
 class Blockchain{
     constructor(){
         this.chain = [this.createGenBlock()];
-        this.difficulty= 2;
+        this.difficulty= 1;
         this.pendingTransactions = [];
         this.miningReward = 100;
     }
     createGenBlock(){
-        return new Block(Date.parse("2022-02-01"), [], "0");
+        return new Block(Date.parse('2022-02-01'), [], '0');
     }
     getLastestBlock(){
         return this.chain[this.chain.length - 1];
@@ -113,10 +111,10 @@ class Blockchain{
         for (const block of this.chain){
             for (const trans of block.transactions){
                 if (trans.fromAddress === address){
-                    balance -= trans.ammount;
+                    balance -= trans.amount;
                 }
                 if (trans.toAddress === address){
-                    balance += trans.ammount;
+                    balance += trans.amount;
                 }
             }
         }
@@ -144,4 +142,5 @@ class Blockchain{
 }
 
 module.exports.Blockchain = Blockchain;
+module.exports.Block = Block;
 module.exports.Transaction = Transaction;

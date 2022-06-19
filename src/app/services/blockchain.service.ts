@@ -2,8 +2,6 @@ import { Injectable } from '@angular/core';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import { Blockchain} from '/src/Crypto/blockchain';
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
 import EC from "elliptic";
 
 @Injectable({
@@ -12,18 +10,34 @@ import EC from "elliptic";
 export class BlockchainService {
 
   public blockchainInstance = new Blockchain();
-  public walletKeys: any  = [];
+  public walletKeys  = [];
 
   constructor() { 
     this.blockchainInstance.difficulty = 1;
     this.blockchainInstance.minePendingTransactions('my-wallet-address');
-
     this.generateWalletKeys();
-
   }
 
   getBlocks(){
     return this.blockchainInstance.chain;
+  }
+
+  addTransaction(tx){
+    this.blockchainInstance.addTransaction(tx);
+  }
+
+  getPendingTransactions(){
+    return this.blockchainInstance.pendingTransactions;
+  }
+
+  minePendingTransactions(){
+    this.blockchainInstance.minePendingTransactions(
+      this.walletKeys[0].publicKey
+    )
+  }
+
+  addressIsFromCurrentUser(address) {
+    return address === this.walletKeys[0].publicKey;
   }
 
   private generateWalletKeys(){
@@ -35,5 +49,7 @@ export class BlockchainService {
       publicKey: key.getPublic('hex'),
       privateKey: key.getPrivate('hex'),
     });
+    
+    console.log(this.walletKeys);
   }
 }
